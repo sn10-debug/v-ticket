@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// / Custom defined models
+enum Role {
+  Staff
+  Admin
+  SuperAdmin
+  Student
+}
+
+enum Categories {
+  Solo
+  Group
+}
+
+//// Custom defined models
+model User {
+  id           String       @id @default(uuid())
+  reg_no       String?      @unique
+  identifier   String?      @unique
+  password     String?
+  name         String?
+  email        String?      @unique
+  role         Role         @default(Student)
+  phone        String?
+  serial_id    String?      @unique
+  gender       String?
+  broken       Boolean      @default(false)
+  year         String?
+  branch       String?
+  super_secret String?
+  isValidated  Boolean      @default(false)
+  log          Log[]
+  Attendance   Attendance[]
+  InOutTime    InOutTime[]
+  Tickets      Tickets[]
+  Account      Account[]
+  Session      Session[]
+  Ticket       Ticket[]
+}
+
+enum logAction {
+  Create
+  Update
+  Delete
+  Verify
+  Open
+  Close
+}
+
+model Log {
+  id        String    @id @default(uuid())
+  userId    String
+  action    logAction
+  timestamp DateTime  @default(now())
+  message   String?
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model Events {
+  id          String       @id @default(uuid())
+  name        String?
+  date        DateTime     @default(now())
+  venue       String?
+  description String?
+  userId      String?
+  Attendance  Attendance[]
+  Tickets     Tickets[]
+  vibranceID  String?
+}
+
+model Attendance {
+  id        String      @id @default(uuid())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  event     Events      @relation(fields: [eventsId], references: [id])
+  eventsId  String
+  InOutTime InOutTime[]
+
+  @@unique([userId, eventsId])
+}
+
+model InOutTime {
+  id              String     @id @default(uuid())
+  attendanceId    String
+  inTime          DateTime   @default(now())
+  verifyingUserId String
+  attendance      Attendance @relation(fields: [attendanceId], references: [id])
+  User            User       @relation(fields: [verifyingUserId], references: [id])
+}
+
+model Tickets {
+  id             String      @id @default(uuid())
+  reg_no         String
+  eventsId       String
+  title          String
+  createdById    String
+  categories     category
+  description    String
+  type           ticket_type
+  created_at     DateTime    @default(now())
+  referredString String?
+  created_by     User        @relation(fields: [createdById], references: [id])
+  event          Events      @relation(fields: [eventsId], references: [id])
+}
+
+/// / NextAuth Types
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Ticket {
+  id      String       @id @default(cuid())
+  userId  String
+  issue   TicketIssues
+  time    DateTime     @default(now())
+  message String
+  user    User         @relation(fields: [userId], references: [id])
+}
+
+enum ticket_type {
+  Broken_ID
+  Payment_Issue
+  User_Not_Found
+  Custom
+}
+
+enum category {
+  Open
+  Close
+  referred
+}
+
+enum Issue {
+  login
+  create
+  verify
+  delete
+}
+
+enum TicketIssues {
+  broken_id
+  payment_issue
+  user_not_found
+  custom
+}

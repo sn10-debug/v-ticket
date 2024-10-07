@@ -1,0 +1,8 @@
+*.yaml
+*.js
+*.cjs
+prisma
+public
+@
+.next
+*.json

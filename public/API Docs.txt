@@ -1,0 +1,25 @@
+part of the base url: /api/andoid
+All requests are POST until SPECIFIED OTHERWISE
+
+{base_url}/data/events/ -> Gives you all events
+(Request Parameters):
+- Token
+
+{base_url}/data/events/[id] -> Gives you all students who have been bulk uploaded to an event
+(Request parameters):
+id: clqv1d44p0000u04nq0ntxqv1
+
+
+{base_url}/data/events/[id]/register -> Registers a particular student 
+(Request parameters)
+- Token
+- serialNo (NFC Read)
+- verifyingUser (Signing in user id from auth)
+- studentID (Student Reg No)
+
+{base_url}/verify -> Verifies student
+- Serial Number
+- Token
+- eventID
+- inTime
+- verifyingUser
